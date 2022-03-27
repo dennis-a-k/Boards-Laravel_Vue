@@ -10,6 +10,7 @@ class Board extends Model
     use HasFactory;
 
     protected $fillable = [
+        'id',
         'title',
     ];
 
@@ -33,5 +34,19 @@ class Board extends Model
     public function createBoard($value)
     {
         return $this->create($value);
+    }
+
+    public function updateBoard($value, $id)
+    {
+        static::find($id)
+            ->fill($value)
+            ->save();
+
+        return static::findOrFail($id);
+    }
+
+    public function deleteBoard($id)
+    {
+        static::find($id)->delete();
     }
 }
