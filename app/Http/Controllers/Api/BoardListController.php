@@ -43,7 +43,9 @@ class BoardListController extends Controller
      */
     public function show($id)
     {
-        //
+        $list = (new BoardList())->getList($id);
+
+        return new BoardListResource($list);
     }
 
     /**
@@ -57,7 +59,7 @@ class BoardListController extends Controller
     {
         $update_list = (new BoardList())->updateList($request->validated(), $id);
 
-        return new BoardListRequest($update_list);
+        return new BoardListResource($update_list);
     }
 
     /**

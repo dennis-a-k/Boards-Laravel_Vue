@@ -25,7 +25,7 @@ class BoardListRequest extends FormRequest
     {
         return [
             'title' => 'required|max:255',
-            'board_id' => 'required|integer|exists:boards,id'
+            'board_id' => 'required|integer|exists:boards,id',
         ];
     }
 }

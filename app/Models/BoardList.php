@@ -22,6 +22,11 @@ class BoardList extends Model
             ->get();
     }
 
+    public function getList($id)
+    {
+        return static::findOrFail($id);
+    }
+
     public function createList($value)
     {
         return $this->create($value);

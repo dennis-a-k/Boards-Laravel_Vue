@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
-import TheHome from "./components/views/pages/TheHome.vue";
-import TheBoard from "./components/views/pages/TheBoard.vue";
+import Home from "./components/views/pages/Home.vue";
+import Board from "./components/views/pages/Board.vue";
 // import TheCart from "./views/pages/TheCart.vue";
 // import TheCheckout from "./views/pages/TheCheckout.vue";
 // import TheLogin from "./views/pages/Auth/TheLogin.vue";
@@ -10,12 +10,12 @@ const routes = [
     {
         path: "/",
         name: "home",
-        component: TheHome,
+        component: Home,
     },
     {
         path: "/board/:id",
         name: "board",
-        component: TheBoard,
+        component: Board,
         props: true,
     },
     // {

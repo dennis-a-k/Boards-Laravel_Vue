@@ -4,7 +4,13 @@
     <div v-if="loader">загрузка...</div>
 
     <div v-else>
-        <input type="text" @blur="saveTitle" v-model="title" />
+        <form v-if="board_id == this.id" @submit.prevent="updateTitle">
+            <input type="text" @blur="updateTitle" v-model="title" />
+            <button type="button" @click="board_id = null">close</button>
+        </form>
+        <h2 v-else @click="board_id = this.id">
+            {{ title }}
+        </h2>
 
         <div v-for="error of v$.title.$errors" :key="error.$uid">
             <span v-if="error.$validator == 'required'">
@@ -17,14 +23,20 @@
         </div>
 
         <div v-for="list in lists" :key="list.id">
-            <router-link :to="{ name: 'board', params: { id: list.id } }">
+            <form
+                v-if="list_id == list.id"
+                @submit.prevent="updateTitleList(list.id, list.title)"
+            >
+                <input
+                    type="text"
+                    @blur="updateTitleList(list.id, list.title)"
+                    v-model="list.title"
+                />
+                <button type="button" @click="list_id = null">close</button>
+            </form>
+            <h3 v-else @click="list_id = list.id">
                 {{ list.title }}
-            </router-link>
-            <input
-                type="text"
-                @blur="updateTitleList(list.id, list.title)"
-                v-model="list.title"
-            />
+            </h3>
 
             <button @click="deleteList(list.id)">Удалить</button>
         </div>
@@ -63,7 +75,7 @@ import { required, maxLength } from "@vuelidate/validators";
 // import { mapActions, mapGetters } from "vuex";
 
 export default {
-    name: "TheBoard",
+    name: "Board",
     components: {
         // AppBoard,
     },
@@ -77,6 +89,8 @@ export default {
         lists: [],
         title: null,
         title_list: null,
+        board_id: null,
+        list_id: null,
         errored: false,
         loader: true,
     }),
@@ -85,8 +99,8 @@ export default {
     },
     methods: {
         addNewList() {
-            this.v$.title_list.$touch();
-            if (!this.v$.title_list.$error) {
+            this.v$.$touch();
+            if (!this.v$.$error) {
                 axios
                     .post("/api/board-lists", {
                         title: this.title_list,
@@ -128,25 +142,30 @@ export default {
                 });
         },
 
-        saveTitle() {
+        updateTitle() {
             this.v$.title.$touch();
             if (!this.v$.title.$error) {
-                axios.post(`/api/boards/${this.id}`, {
-                    _method: "PUT",
-                    title: this.title,
-                });
+                axios
+                    .post(`/api/boards/${this.id}`, {
+                        _method: "PUT",
+                        title: this.title,
+                    })
+                    .then((response) => {
+                        this.board_id = null;
+                    });
             }
         },
 
         updateTitleList(id, title) {
-            this.v$.title_list.$touch();
-            if (!this.v$.title_list.$error) {
-                axios.post(`/api/board-lists/${id}`, {
+            axios
+                .post(`/api/board-lists/${id}`, {
                     _method: "PUT",
                     title: title,
                     board_id: this.id,
+                })
+                .then((response) => {
+                    this.list_id = null;
                 });
-            }
         },
     },
     validations: () => ({
@@ -161,3 +180,9 @@ export default {
     }),
 };
 </script>
+
+<style scoped>
+h3 {
+    cursor: pointer;
+}
+</style>

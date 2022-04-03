@@ -34,7 +34,7 @@ import useVuelidate from "@vuelidate/core";
 import { required, maxLength } from "@vuelidate/validators";
 
 export default {
-    name: "TheHome",
+    name: "Home",
     components: {
         // AppBoard,
     },
