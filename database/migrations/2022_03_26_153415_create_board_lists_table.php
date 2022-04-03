@@ -16,7 +16,7 @@ class CreateBoardListsTable extends Migration
         Schema::create('board_lists', function (Blueprint $table) {
             $table->id();
             $table->string('title');
-            $table->foreignId('board_id')->constrained();
+            $table->foreignId('board_id')->constrained()->onDelete('cascade');
             $table->timestamps();
         });
     }
