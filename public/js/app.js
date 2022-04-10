@@ -21708,16 +21708,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _vuelidate_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @vuelidate/core */ "./node_modules/@vuelidate/core/dist/index.esm.js");
 /* harmony import */ var _vuelidate_validators__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @vuelidate/validators */ "./node_modules/@vuelidate/validators/dist/index.esm.js");
 
- // import AppBreadcrump from "../../components/breadcrumb/app-breadcrumb.vue";
-// import AppCardProduct from "../../components/cards/app-card-product.vue";
-// import AppSliderGoods from "../../components/sliders/app-slider-goods.vue";
-// import AppModalReview from "../../components/modals/app-modal-review.vue";
-// import { mapActions, mapGetters } from "vuex";
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: "Board",
-  components: {// AppBoard,
-  },
   props: {
     id: {
       type: String
@@ -21727,6 +21720,7 @@ __webpack_require__.r(__webpack_exports__);
     return {
       v$: (0,_vuelidate_core__WEBPACK_IMPORTED_MODULE_0__["default"])(),
       lists: [],
+      cards: [],
       title: null,
       title_list: null,
       board_id: null,
@@ -21739,50 +21733,81 @@ __webpack_require__.r(__webpack_exports__);
     this.getAllLists();
   },
   methods: {
-    addNewList: function addNewList() {
+    addNewCard: function addNewCard(id) {
       var _this = this;
 
-      this.v$.$touch();
+      this.v$.cards.$touch();
 
-      if (!this.v$.$error) {
-        axios.post("/api/board-lists", {
-          title: this.title_list,
-          board_id: this.id
+      if (!this.v$.cards.$error) {
+        axios.post("/api/cards", {
+          title: this.cards[id],
+          board_list_id: id
         }).then(function (response) {
-          _this.title_list = "";
-          _this.lists = [];
+          _this.v$.$reset();
+
+          _this.cards = [];
 
           _this.getAllLists();
         });
       }
     },
-    deleteList: function deleteList(id) {
+    addNewList: function addNewList() {
       var _this2 = this;
 
-      if (confirm("Удалить список?")) {
-        axios.post("/api/board-lists/".concat(id), {
-          _method: "DELETE"
+      this.v$.title_list.$touch();
+
+      if (!this.v$.title_list.$error) {
+        axios.post("/api/board-lists", {
+          title: this.title_list,
+          board_id: this.id
         }).then(function (response) {
+          _this2.v$.$reset();
+
+          _this2.title_list = "";
           _this2.lists = [];
 
           _this2.getAllLists();
         });
       }
     },
-    getAllLists: function getAllLists() {
+    deleteCard: function deleteCard(id) {
       var _this3 = this;
 
+      if (confirm("Удалить карточку?")) {
+        axios.post("/api/cards/".concat(id), {
+          _method: "DELETE"
+        }).then(function (response) {
+          _this3.getAllLists();
+        });
+      }
+    },
+    deleteList: function deleteList(id) {
+      var _this4 = this;
+
+      if (confirm("Удалить список?")) {
+        axios.post("/api/board-lists/".concat(id), {
+          _method: "DELETE"
+        }).then(function (response) {
+          _this4.lists = [];
+
+          _this4.getAllLists();
+        });
+      }
+    },
+    getAllLists: function getAllLists() {
+      var _this5 = this;
+
       axios.get("/api/boards/".concat(this.id)).then(function (response) {
-        _this3.title = response.data.data.title;
-        _this3.lists = response.data.data.lists;
+        _this5.title = response.data.data.title;
+        _this5.lists = response.data.data.lists;
       })["catch"](function (error) {
-        _this3.errored = true;
+        _this5.errored = true;
       })["finally"](function () {
-        _this3.loader = false;
+        _this5.loader = false;
       });
     },
     updateTitle: function updateTitle() {
-      var _this4 = this;
+      var _this6 = this;
 
       this.v$.title.$touch();
 
@@ -21791,19 +21816,19 @@ __webpack_require__.r(__webpack_exports__);
           _method: "PUT",
           title: this.title
         }).then(function (response) {
-          _this4.board_id = null;
+          _this6.board_id = null;
         });
       }
     },
     updateTitleList: function updateTitleList(id, title) {
-      var _this5 = this;
+      var _this7 = this;
 
       axios.post("/api/board-lists/".concat(id), {
         _method: "PUT",
         title: title,
         board_id: this.id
       }).then(function (response) {
-        _this5.list_id = null;
+        _this7.list_id = null;
       });
     }
   },
@@ -21816,6 +21841,10 @@ __webpack_require__.r(__webpack_exports__);
       title_list: {
         required: _vuelidate_validators__WEBPACK_IMPORTED_MODULE_1__.required,
         maxLength: (0,_vuelidate_validators__WEBPACK_IMPORTED_MODULE_1__.maxLength)(255)
+      },
+      cards: {
+        required: _vuelidate_validators__WEBPACK_IMPORTED_MODULE_1__.required // maxLength: maxLength(5),
+
       }
     };
   }
@@ -21864,6 +21893,8 @@ __webpack_require__.r(__webpack_exports__);
         axios.post("/api/boards", {
           title: this.title
         }).then(function (response) {
+          _this.v$.$reset();
+
           _this.title = "";
           _this.boards = [];
 
@@ -21967,26 +21998,32 @@ var _hoisted_2 = {
   key: 0
 };
 var _hoisted_3 = {
-  key: 1
+  key: 0
 };
 var _hoisted_4 = {
-  key: 0
-};
-var _hoisted_5 = {
   key: 1
 };
-var _hoisted_6 = ["onSubmit"];
-var _hoisted_7 = ["onBlur", "onUpdate:modelValue"];
-var _hoisted_8 = ["onClick"];
-var _hoisted_9 = ["onClick"];
-var _hoisted_10 = {
+var _hoisted_5 = {
   key: 0
 };
-var _hoisted_11 = {
+var _hoisted_6 = {
+  key: 1
+};
+var _hoisted_7 = ["onSubmit"];
+var _hoisted_8 = ["onBlur", "onUpdate:modelValue"];
+var _hoisted_9 = ["onClick"];
+var _hoisted_10 = ["onClick"];
+var _hoisted_11 = ["onClick"];
+var _hoisted_12 = ["onSubmit"];
+var _hoisted_13 = ["onUpdate:modelValue"];
+var _hoisted_14 = {
+  key: 0
+};
+var _hoisted_15 = {
   key: 1
 };
 
-var _hoisted_12 = /*#__PURE__*/_withScopeId(function () {
+var _hoisted_16 = /*#__PURE__*/_withScopeId(function () {
   return /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
     type: "submit"
   }, "Создать", -1
@@ -21994,7 +22031,7 @@ var _hoisted_12 = /*#__PURE__*/_withScopeId(function () {
   );
 });
 
-var _hoisted_13 = {
+var _hoisted_17 = {
   key: 2
 };
 function render(_ctx, _cache, $props, $setup, $data, $options) {
@@ -22013,7 +22050,13 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     _: 1
     /* STABLE */
 
-  }), _ctx.loader ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_2, "загрузка...")) : ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_3, [_ctx.board_id == this.id ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("form", {
+  }), ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)(_ctx.v$.cards.$errors, function (error) {
+    return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
+      key: error.$uid
+    }, [error.$validator == 'required' ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_2, " Введите название карточки! ")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" <span v-if=\"error.$validator == 'maxLength'\">\n            Максимальное количество символов:\n            {{ error.$params.max }}\n        </span> ")]);
+  }), 128
+  /* KEYED_FRAGMENT */
+  )), _ctx.loader ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_3, "загрузка...")) : ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_4, [_ctx.board_id == this.id ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("form", {
     key: 0,
     onSubmit: _cache[3] || (_cache[3] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
       return $options.updateTitle && $options.updateTitle.apply($options, arguments);
@@ -22045,7 +22088,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
   )), ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)(_ctx.v$.title.$errors, function (error) {
     return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
       key: error.$uid
-    }, [error.$validator == 'required' ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_4, " Введите название доски! ")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), error.$validator == 'maxLength' ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_5, " Максимальное количество символов: " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(error.$params.max), 1
+    }, [error.$validator == 'required' ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_5, " Введите название доски! ")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), error.$validator == 'maxLength' ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_6, " Максимальное количество символов: " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(error.$params.max), 1
     /* TEXT */
     )) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)]);
   }), 128
@@ -22068,27 +22111,56 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       }
     }, null, 40
     /* PROPS, HYDRATE_EVENTS */
-    , _hoisted_7), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, list.title]]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+    , _hoisted_8), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, list.title]]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
       type: "button",
       onClick: _cache[5] || (_cache[5] = function ($event) {
         return _ctx.list_id = null;
       })
     }, "close")], 40
     /* PROPS, HYDRATE_EVENTS */
-    , _hoisted_6)) : ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("h3", {
+    , _hoisted_7)) : ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("h3", {
       key: 1,
       onClick: function onClick($event) {
         return _ctx.list_id = list.id;
       }
     }, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(list.title), 9
     /* TEXT, PROPS */
-    , _hoisted_8)), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+    , _hoisted_9)), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
       onClick: function onClick($event) {
         return $options.deleteList(list.id);
       }
     }, "Удалить", 8
     /* PROPS */
-    , _hoisted_9)]);
+    , _hoisted_10), ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)(list.cards, function (card) {
+      return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
+        key: card.id
+      }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)((0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(card.title) + " ", 1
+      /* TEXT */
+      ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+        onClick: function onClick($event) {
+          return $options.deleteCard(card.id);
+        }
+      }, "Удалить", 8
+      /* PROPS */
+      , _hoisted_11)]);
+    }), 128
+    /* KEYED_FRAGMENT */
+    )), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("form", {
+      onSubmit: (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function ($event) {
+        return $options.addNewCard(list.id);
+      }, ["prevent"])
+    }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
+      type: "text",
+      placeholder: "Создать карточку",
+      maxlength: "255",
+      "onUpdate:modelValue": function onUpdateModelValue($event) {
+        return _ctx.cards[list.id] = $event;
+      }
+    }, null, 8
+    /* PROPS */
+    , _hoisted_13), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, _ctx.cards[list.id]]])], 40
+    /* PROPS, HYDRATE_EVENTS */
+    , _hoisted_12)]);
   }), 128
   /* KEYED_FRAGMENT */
   )), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("form", {
@@ -22106,14 +22178,14 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
   ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, _ctx.title_list]]), ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)(_ctx.v$.title_list.$errors, function (error) {
     return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
       key: error.$uid
-    }, [error.$validator == 'required' ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_10, " Введите название списка! ")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), error.$validator == 'maxLength' ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_11, " Максимальное количество символов: " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(error.$params.max), 1
+    }, [error.$validator == 'required' ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_14, " Введите название списка! ")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), error.$validator == 'maxLength' ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_15, " Максимальное количество символов: " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(error.$params.max), 1
     /* TEXT */
     )) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)]);
   }), 128
   /* KEYED_FRAGMENT */
-  )), _hoisted_12], 32
+  )), _hoisted_16], 32
   /* HYDRATE_EVENTS */
-  )])), _ctx.errored ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_13, "Ошибка загрузки данных!")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)], 64
+  )])), _ctx.errored ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_17, "Ошибка загрузки данных!")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)], 64
   /* STABLE_FRAGMENT */
   );
 }
@@ -22268,6 +22340,9 @@ app.mount("#app");
   !*** ./resources/js/bootstrap.js ***!
   \***********************************/
 /***/ ((__unused_webpack_module, __unused_webpack_exports, __webpack_require__) => {
+
+var _require = __webpack_require__(/*! @vuelidate/validators */ "./node_modules/@vuelidate/validators/dist/index.esm.js"),
+    required = _require.required;
 
 window._ = __webpack_require__(/*! lodash */ "./node_modules/lodash/lodash.js");
 /**

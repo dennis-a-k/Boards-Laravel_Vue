@@ -1,6 +1,17 @@
 <template>
     <router-link :to="{ name: 'home' }">Доски</router-link>
 
+    <div v-for="error of v$.cards.$errors" :key="error.$uid">
+        <span v-if="error.$validator == 'required'">
+            Введите название карточки!
+        </span>
+
+        <!-- <span v-if="error.$validator == 'maxLength'">
+            Максимальное количество символов:
+            {{ error.$params.max }}
+        </span> -->
+    </div>
+
     <div v-if="loader">загрузка...</div>
 
     <div v-else>
@@ -39,6 +50,20 @@
             </h3>
 
             <button @click="deleteList(list.id)">Удалить</button>
+
+            <div v-for="card in list.cards" :key="card.id">
+                {{ card.title }}
+                <button @click="deleteCard(card.id)">Удалить</button>
+            </div>
+
+            <form @submit.prevent="addNewCard(list.id)">
+                <input
+                    type="text"
+                    placeholder="Создать карточку"
+                    maxlength="255"
+                    v-model="cards[list.id]"
+                />
+            </form>
         </div>
 
         <form @submit.prevent="addNewList">
@@ -68,17 +93,9 @@
 <script>
 import useVuelidate from "@vuelidate/core";
 import { required, maxLength } from "@vuelidate/validators";
-// import AppBreadcrump from "../../components/breadcrumb/app-breadcrumb.vue";
-// import AppCardProduct from "../../components/cards/app-card-product.vue";
-// import AppSliderGoods from "../../components/sliders/app-slider-goods.vue";
-// import AppModalReview from "../../components/modals/app-modal-review.vue";
-// import { mapActions, mapGetters } from "vuex";
 
 export default {
     name: "Board",
-    components: {
-        // AppBoard,
-    },
     props: {
         id: {
             type: String,
@@ -87,6 +104,7 @@ export default {
     data: () => ({
         v$: useVuelidate(),
         lists: [],
+        cards: [],
         title: null,
         title_list: null,
         board_id: null,
@@ -98,17 +116,46 @@ export default {
         this.getAllLists();
     },
     methods: {
+        addNewCard(id) {
+            this.v$.cards.$touch();
+            if (!this.v$.cards.$error) {
+                axios
+                    .post("/api/cards", {
+                        title: this.cards[id],
+                        board_list_id: id,
+                    })
+                    .then((response) => {
+                        this.v$.$reset();
+                        this.cards = [];
+                        this.getAllLists();
+                    });
+            }
+        },
+
         addNewList() {
-            this.v$.$touch();
-            if (!this.v$.$error) {
+            this.v$.title_list.$touch();
+            if (!this.v$.title_list.$error) {
                 axios
                     .post("/api/board-lists", {
                         title: this.title_list,
                         board_id: this.id,
                     })
                     .then((response) => {
+                        this.v$.$reset();
                         this.title_list = "";
                         this.lists = [];
+                        this.getAllLists();
+                    });
+            }
+        },
+
+        deleteCard(id) {
+            if (confirm("Удалить карточку?")) {
+                axios
+                    .post(`/api/cards/${id}`, {
+                        _method: "DELETE",
+                    })
+                    .then((response) => {
                         this.getAllLists();
                     });
             }
@@ -176,6 +223,10 @@ export default {
         title_list: {
             required,
             maxLength: maxLength(255),
+        },
+        cards: {
+            required,
+            // maxLength: maxLength(5),
         },
     }),
 };

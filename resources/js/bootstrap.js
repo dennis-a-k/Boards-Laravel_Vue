@@ -1,3 +1,5 @@
+const { required } = require("@vuelidate/validators");
+
 window._ = require("lodash");
 
 /**

@@ -15,6 +15,11 @@ class BoardList extends Model
         'board_id',
     ];
 
+    public function cards()
+    {
+        return $this->hasMany(Card::class);
+    }
+
     public function getLists()
     {
         return static::query()

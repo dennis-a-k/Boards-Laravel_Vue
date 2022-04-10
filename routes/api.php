@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\BoardController;
 use App\Http\Controllers\Api\BoardListController;
+use App\Http\Controllers\Api\CardController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -23,4 +24,5 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::apiResources([
     'boards' => BoardController::class,
     'board-lists' => BoardListController::class,
+    'cards' => CardController::class,
 ]);

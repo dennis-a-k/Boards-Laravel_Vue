@@ -57,6 +57,7 @@ export default {
                         title: this.title,
                     })
                     .then((response) => {
+                        this.v$.$reset();
                         this.title = "";
                         this.boards = [];
                         this.getAllBoards();
