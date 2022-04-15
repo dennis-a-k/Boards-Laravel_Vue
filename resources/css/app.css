@@ -3,3 +3,12 @@
     display: grid;
     grid-template: minmax(auto, auto) 1fr minmax(auto, auto) / 1fr;
 }
+
+a {
+    text-decoration: none;
+    color: #495057;
+}
+
+a:hover {
+    color: #000;
+}

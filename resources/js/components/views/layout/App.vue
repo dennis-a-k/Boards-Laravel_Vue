@@ -1,25 +1,23 @@
 <template>
-    <!-- <TheHeader /> -->
+    <Header />
 
     <main>
         <div>
             <router-view></router-view>
-
-            <Button>Send</Button>
         </div>
     </main>
 
-    <!-- <TheFooter /> -->
+    <Footer />
 </template>
 
 <script>
-// import TheHeader from "../../components/TheHeader.vue";
-// import TheFooter from "../../components/TheFooter.vue";
+import Header from "../../Header.vue";
+import Footer from "../../Footer.vue";
 
-// export default {
-//     components: {
-//         TheHeader,
-//         TheFooter,
-//     },
-// };
+export default {
+    components: {
+        Header,
+        Footer,
+    },
+};
 </script>

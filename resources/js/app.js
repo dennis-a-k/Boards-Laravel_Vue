@@ -7,7 +7,10 @@ import PrimeVue from "primevue/config";
 import router from "./router";
 
 // компоненты PrimeVue
+import Menubar from "primevue/menubar";
 import Button from "primevue/button";
+import Card from "primevue/card";
+import InputText from "primevue/inputtext";
 import ToastService from "primevue/toastservice";
 
 import "primevue/resources/themes/saga-blue/theme.css"; //theme
@@ -20,7 +23,10 @@ app.use(PrimeVue);
 app.use(router);
 
 app.component("App", App);
+app.component("Menubar", Menubar);
 app.component("Button", Button);
+app.component("Card", Card);
+app.component("InputText", InputText);
 app.component("ToastService", ToastService);
 
 app.mount("#app");
