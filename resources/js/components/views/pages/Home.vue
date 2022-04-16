@@ -1,13 +1,17 @@
 <template>
     <div class="row justify-content-center">
-        <div class="col col-md-2 w-50 my-3">
+        <div class="col col-md-2 w-50 my-4">
             <form @submit.prevent="addNewBoard">
-                <InputText
-                    type="text"
-                    placeholder="Создать доску"
-                    v-model="title"
-                    class="w-100"
-                />
+                <span class="p-float-label">
+                    <InputText
+                        :class="{ 'p-invalid': v$.title.$error }"
+                        id="title"
+                        type="text"
+                        v-model="title"
+                        class="w-100"
+                    />
+                    <label for="title">Создать доску</label>
+                </span>
 
                 <div
                     class="text-center"
@@ -58,7 +62,11 @@
     </div>
 
     <div v-if="loader" class="text-center"><h4>загрузка...</h4></div>
-    <div v-if="errored">Ошибка загрузки данных!</div>
+    <div v-if="errored" class="text-center">
+        <Message severity="error" :closable="false">
+            <h4>Ошибка загрузки данных!</h4>
+        </Message>
+    </div>
 </template>
 
 <script>

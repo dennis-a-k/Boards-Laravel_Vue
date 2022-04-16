@@ -41,7 +41,9 @@ class CardController extends Controller
      */
     public function show($id)
     {
-        //
+        $card = (new Card())->getCard($id);
+
+        return new CardResource($card);
     }
 
     /**
@@ -53,7 +55,9 @@ class CardController extends Controller
      */
     public function update(CardRequest $request, $id)
     {
-        //
+        $update_card = (new Card())->updateCard($request->validated(), $id);
+
+        return new CardResource($update_card);
     }
 
     /**

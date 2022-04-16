@@ -1,93 +1,332 @@
 <template>
-    <router-link :to="{ name: 'home' }">Доски</router-link>
-
-    <div v-for="error of v$.cards.$errors" :key="error.$uid">
+    <!-- <div v-for="error of v$.cards.$errors" :key="error.$uid">
         <span v-if="error.$validator == 'required'">
             Введите название карточки!
         </span>
 
-        <!-- <span v-if="error.$validator == 'maxLength'">
+        <span v-if="error.$validator == 'maxLength'">
             Максимальное количество символов:
             {{ error.$params.max }}
-        </span> -->
-    </div>
-
-    <div v-if="loader">загрузка...</div>
+        </span>
+    </div> -->
+    <Toast />
+    <div v-if="loader" class="text-center my-3"><h4>загрузка...</h4></div>
 
     <div v-else>
-        <form v-if="board_id == this.id" @submit.prevent="updateTitle">
-            <input type="text" @blur="updateTitle" v-model="title" />
-            <button type="button" @click="board_id = null">close</button>
-        </form>
-        <h2 v-else @click="board_id = this.id">
-            {{ title }}
-        </h2>
+        <div class="my-4">
+            <form v-if="board_id == this.id" @submit.prevent="updateTitle">
+                <div class="grid p-fluid">
+                    <div class="col-md-8 col-lg-6">
+                        <div class="p-inputgroup">
+                            <InputText
+                                :class="{ 'p-invalid': v$.title.$error }"
+                                type="text"
+                                @blur="updateTitle"
+                                v-model="title"
+                            />
+                            <Button
+                                icon="pi pi-check"
+                                class="p-button-success"
+                                type="button"
+                                @click="board_id = null"
+                            />
+                        </div>
 
-        <div v-for="error of v$.title.$errors" :key="error.$uid">
-            <span v-if="error.$validator == 'required'">
-                Введите название доски!
-            </span>
+                        <div
+                            v-for="error of v$.title.$errors"
+                            :key="error.$uid"
+                            class="text-center"
+                        >
+                            <span v-if="error.$validator == 'required'">
+                                <small class="p-error"
+                                    >Введите название доски!</small
+                                >
+                            </span>
 
-            <span v-if="error.$validator == 'maxLength'">
-                Максимальное количество символов: {{ error.$params.max }}
-            </span>
+                            <span v-if="error.$validator == 'maxLength'">
+                                <small class="p-error">
+                                    Максимальное количество символов:
+                                    {{ error.$params.max }}
+                                </small>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            <h2 v-else @click="board_id = this.id">
+                {{ title }}
+            </h2>
         </div>
 
-        <div v-for="list in lists" :key="list.id">
-            <form
-                v-if="list_id == list.id"
-                @submit.prevent="updateTitleList(list.id, list.title)"
+        <div class="row">
+            <!-- <ScrollPanel style="width: 100%"> -->
+            <div
+                v-for="list in lists"
+                :key="list.id"
+                class="col-md-6 col-lg-4 col-xl-3 mb-3"
             >
-                <input
-                    type="text"
-                    @blur="updateTitleList(list.id, list.title)"
-                    v-model="list.title"
-                />
-                <button type="button" @click="list_id = null">close</button>
-            </form>
-            <h3 v-else @click="list_id = list.id">
-                {{ list.title }}
-            </h3>
+                <Card>
+                    <template #header>
+                        <div class="d-flex justify-content-end">
+                            <Button
+                                class="p-button p-component p-button-icon-only p-button-rounded p-button-danger p-button-text"
+                                @click="deleteList(list.id)"
+                            >
+                                <span class="pi pi-trash p-button-icon"></span>
+                            </Button>
+                        </div>
+                    </template>
 
-            <button @click="deleteList(list.id)">Удалить</button>
+                    <template #subtitle>
+                        <form
+                            v-if="list_id == list.id"
+                            @submit.prevent="
+                                updateTitleList(list.id, list.title)
+                            "
+                        >
+                            <div class="grid p-fluid">
+                                <div class="p-inputgroup">
+                                    <InputText
+                                        type="text"
+                                        @blur="
+                                            updateTitleList(list.id, list.title)
+                                        "
+                                        v-model="list.title"
+                                    />
+                                    <Button
+                                        icon="pi pi-times"
+                                        class="p-button-danger"
+                                        type="button"
+                                        @click="list_id = null"
+                                    />
+                                </div>
+                            </div>
+                        </form>
 
-            <div v-for="card in list.cards" :key="card.id">
-                {{ card.title }}
-                <button @click="deleteCard(card.id)">Удалить</button>
+                        <h3 v-else @click="list_id = list.id">
+                            {{ list.title }}
+                        </h3>
+                    </template>
+
+                    <template #content>
+                        <div
+                            class="card-title"
+                            v-for="card in list.cards"
+                            :key="card.id"
+                            @click="getCard(card.id)"
+                        >
+                            <Card
+                                data-bs-toggle="modal"
+                                :data-bs-target="'#modal' + card.id"
+                            >
+                                <template #content>
+                                    {{ card.title }}
+                                    <button @click="deleteCard(card.id)">
+                                        Удалить
+                                    </button>
+                                </template>
+                            </Card>
+
+                            <!-- Modal -->
+                            <div
+                                class="modal fade"
+                                :id="'modal' + card.id"
+                                tabindex="-1"
+                                aria-labelledby="exampleModalLabel"
+                                aria-hidden="true"
+                            >
+                                <div class="modal-dialog modal-lg">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <div class="col-10">
+                                                <form
+                                                    v-if="card_id == card.id"
+                                                    @submit.prevent="
+                                                        updateTitleCard(
+                                                            card.id,
+                                                            card.title
+                                                        )
+                                                    "
+                                                >
+                                                    <div class="grid p-fluid">
+                                                        <div
+                                                            class="p-inputgroup"
+                                                        >
+                                                            <InputText
+                                                                :class="{
+                                                                    'p-invalid':
+                                                                        v$.card
+                                                                            .title
+                                                                            .$error,
+                                                                }"
+                                                                type="text"
+                                                                @blur="
+                                                                    updateTitleCard(
+                                                                        card.id,
+                                                                        card.title
+                                                                    )
+                                                                "
+                                                                v-model="
+                                                                    card.title
+                                                                "
+                                                            />
+                                                            <Button
+                                                                icon="pi pi-check"
+                                                                class="p-button-success"
+                                                                type="button"
+                                                                @click="
+                                                                    card_id =
+                                                                        null
+                                                                "
+                                                            />
+                                                        </div>
+
+                                                        <div
+                                                            v-for="error of v$
+                                                                .card.title
+                                                                .$errors"
+                                                            :key="error.$uid"
+                                                            class="text-center"
+                                                        >
+                                                            <span
+                                                                v-if="
+                                                                    error.$validator ==
+                                                                    'required'
+                                                                "
+                                                            >
+                                                                <small
+                                                                    class="p-error"
+                                                                    >Введите
+                                                                    название
+                                                                    карточки!</small
+                                                                >
+                                                            </span>
+
+                                                            <span
+                                                                v-if="
+                                                                    error.$validator ==
+                                                                    'maxLength'
+                                                                "
+                                                            >
+                                                                <small
+                                                                    class="p-error"
+                                                                >
+                                                                    Максимальное
+                                                                    количество
+                                                                    символов:
+                                                                    {{
+                                                                        error
+                                                                            .$params
+                                                                            .max
+                                                                    }}
+                                                                </small>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </form>
+
+                                                <h3
+                                                    v-else
+                                                    @click="card_id = card.id"
+                                                >
+                                                    {{ card.title }}
+                                                </h3>
+                                            </div>
+                                            <button
+                                                type="button"
+                                                class="btn-close"
+                                                data-bs-dismiss="modal"
+                                                aria-label="Close"
+                                            ></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            {{ v$.card.title }}
+                                            <p>{{ card.id }}</p>
+                                            <p>{{ card.title }}</p>
+                                            <p>{{ card.board_list_id }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+
+                    <template #footer>
+                        <form @submit.prevent="addNewCard(list.id)">
+                            <div class="grid p-fluid">
+                                <div class="p-inputgroup">
+                                    <span class="p-float-label">
+                                        <InputText
+                                            id="card"
+                                            type="text"
+                                            maxlength="255"
+                                            v-model="cards[list.id]"
+                                        />
+                                        <label for="card">
+                                            Создать карточку
+                                        </label>
+                                    </span>
+                                </div>
+                            </div>
+                        </form>
+                    </template>
+                </Card>
             </div>
+            <div class="col-md-6 col-lg-4 col-xl-3">
+                <Card>
+                    <template #content>
+                        <form @submit.prevent="addNewList">
+                            <div class="grid p-fluid">
+                                <div class="p-inputgroup">
+                                    <span class="p-float-label">
+                                        <InputText
+                                            :class="{
+                                                'p-invalid':
+                                                    v$.title_list.$error,
+                                            }"
+                                            id="title_list"
+                                            type="text"
+                                            v-model="title_list"
+                                        />
+                                        <label for="title_list">
+                                            Создать список
+                                        </label>
+                                    </span>
+                                </div>
+                            </div>
 
-            <form @submit.prevent="addNewCard(list.id)">
-                <input
-                    type="text"
-                    placeholder="Создать карточку"
-                    maxlength="255"
-                    v-model="cards[list.id]"
-                />
-            </form>
+                            <div
+                                class="text-center"
+                                v-for="error of v$.title_list.$errors"
+                                :key="error.$uid"
+                            >
+                                <span v-if="error.$validator == 'required'">
+                                    <small class="p-error">
+                                        Введите название списка!
+                                    </small>
+                                </span>
+
+                                <span v-if="error.$validator == 'maxLength'">
+                                    <small class="p-error">
+                                        Максимальное количество символов:
+                                        {{ error.$params.max }}
+                                    </small>
+                                </span>
+                            </div>
+                        </form>
+                    </template>
+                </Card>
+            </div>
+            <!-- </ScrollPanel> -->
         </div>
-
-        <form @submit.prevent="addNewList">
-            <input
-                type="text"
-                placeholder="Создать список"
-                v-model="title_list"
-            />
-
-            <div v-for="error of v$.title_list.$errors" :key="error.$uid">
-                <span v-if="error.$validator == 'required'">
-                    Введите название списка!
-                </span>
-
-                <span v-if="error.$validator == 'maxLength'">
-                    Максимальное количество символов: {{ error.$params.max }}
-                </span>
-            </div>
-
-            <button type="submit">Создать</button>
-        </form>
     </div>
 
-    <div v-if="errored">Ошибка загрузки данных!</div>
+    <div v-if="errored" class="text-center">
+        <Message severity="error" :closable="false">
+            <h4>Ошибка загрузки данных!</h4>
+        </Message>
+    </div>
 </template>
 
 <script>
@@ -104,11 +343,13 @@ export default {
     data: () => ({
         v$: useVuelidate(),
         lists: [],
+        card: [],
         cards: [],
         title: null,
         title_list: null,
         board_id: null,
         list_id: null,
+        card_id: null,
         errored: false,
         loader: true,
     }),
@@ -128,7 +369,18 @@ export default {
                         this.v$.$reset();
                         this.cards = [];
                         this.getAllLists();
+                        this.$toast.add({
+                            severity: "success",
+                            summary: "Карточка создана",
+                            life: 3000,
+                        });
                     });
+            } else {
+                this.$toast.add({
+                    severity: "error",
+                    summary: "Введите название карточки!",
+                    life: 3000,
+                });
             }
         },
 
@@ -147,6 +399,12 @@ export default {
                         this.getAllLists();
                     });
             }
+        },
+
+        getCard(id) {
+            axios.get(`/api/cards/${id}`).then((response) => {
+                this.card = response.data.data;
+            });
         },
 
         deleteCard(id) {
@@ -214,6 +472,22 @@ export default {
                     this.list_id = null;
                 });
         },
+
+        updateTitleCard(id, title) {
+            this.v$.card.title.$touch();
+            if (!this.v$.card.title.$error) {
+                axios
+                    .post(`/api/cards/${id}`, {
+                        _method: "PUT",
+                        title: title,
+                        board_list_id: this.card.board_list_id,
+                    })
+                    .then((response) => {
+                        this.v$.$reset();
+                        this.title_card = false;
+                    });
+            }
+        },
     },
     validations: () => ({
         title: {
@@ -224,6 +498,12 @@ export default {
             required,
             maxLength: maxLength(255),
         },
+        card: {
+            title: {
+                required,
+                maxLength: maxLength(5),
+            },
+        },
         cards: {
             required,
             // maxLength: maxLength(5),
@@ -233,7 +513,11 @@ export default {
 </script>
 
 <style scoped>
+h2,
 h3 {
+    cursor: pointer;
+}
+.card-title {
     cursor: pointer;
 }
 </style>

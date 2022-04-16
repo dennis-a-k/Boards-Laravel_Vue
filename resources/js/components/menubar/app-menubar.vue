@@ -15,6 +15,5 @@
 <script>
 export default {
     name: "app-menubar",
-    data: () => ({}),
 };
 </script>

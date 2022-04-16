@@ -15,9 +15,23 @@ class Card extends Model
         'board_list_id',
     ];
 
+    public function getCard($id)
+    {
+        return static::findOrFail($id);
+    }
+
     public function createCard($value)
     {
         return $this->create($value);
+    }
+
+    public function updateCard($value, $id)
+    {
+        static::find($id)
+            ->fill($value)
+            ->save();
+
+        return static::findOrFail($id);
     }
 
     public function deleteCard($id)
