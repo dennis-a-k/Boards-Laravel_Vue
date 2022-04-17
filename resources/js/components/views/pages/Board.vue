@@ -1,14 +1,4 @@
 <template>
-    <!-- <div v-for="error of v$.cards.$errors" :key="error.$uid">
-        <span v-if="error.$validator == 'required'">
-            Введите название карточки!
-        </span>
-
-        <span v-if="error.$validator == 'maxLength'">
-            Максимальное количество символов:
-            {{ error.$params.max }}
-        </span>
-    </div> -->
     <Toast />
     <div v-if="loader" class="text-center my-3"><h4>загрузка...</h4></div>
 
@@ -94,8 +84,8 @@
                                         v-model="list.title"
                                     />
                                     <Button
-                                        icon="pi pi-times"
-                                        class="p-button-danger"
+                                        icon="pi pi-check"
+                                        class="p-button-success"
                                         type="button"
                                         @click="list_id = null"
                                     />
@@ -206,14 +196,105 @@
                                             </div>
                                         </div>
                                         <div class="modal-body">
-                                            <p>{{ card.id }}</p>
-                                            <p>{{ card.title }}</p>
-                                            <p>{{ card.board_list_id }}</p>
+                                            <div
+                                                class="form-check"
+                                                v-for="task in card.tasks"
+                                                :key="task.id"
+                                            >
+                                                <input
+                                                    class="form-check-input"
+                                                    type="checkbox"
+                                                    :value="task.title"
+                                                    :id="
+                                                        'flexCheckDefault' +
+                                                        task.id
+                                                    "
+                                                />
+                                                <label
+                                                    class="form-check-label"
+                                                    :for="
+                                                        'flexCheckDefault' +
+                                                        task.id
+                                                    "
+                                                >
+                                                    {{ task.title }}
+                                                </label>
+                                                <Button
+                                                    class="p-button p-component p-button-icon-only p-button-rounded p-button-danger p-button-text"
+                                                    @click="deleteTask(task.id)"
+                                                >
+                                                    <span
+                                                        class="pi pi-times p-button-icon"
+                                                    ></span>
+                                                </Button>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <form @submit.prevent="addNewTask">
+                                                <div class="grid p-fluid">
+                                                    <div class="p-inputgroup">
+                                                        <span
+                                                            class="p-float-label"
+                                                        >
+                                                            <InputText
+                                                                :class="{
+                                                                    'p-invalid':
+                                                                        v$
+                                                                            .title_task
+                                                                            .$error,
+                                                                }"
+                                                                id="title_task"
+                                                                type="text"
+                                                                v-model="
+                                                                    title_task
+                                                                "
+                                                            />
+                                                            <label
+                                                                for="title_task"
+                                                            >
+                                                                Создать задачу
+                                                            </label>
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                <div
+                                                    class="text-center"
+                                                    v-for="error of v$
+                                                        .title_task.$errors"
+                                                    :key="error.$uid"
+                                                >
+                                                    <span
+                                                        v-if="
+                                                            error.$validator ==
+                                                            'required'
+                                                        "
+                                                    >
+                                                        <small class="p-error">
+                                                            Введите задачу!
+                                                        </small>
+                                                    </span>
+
+                                                    <span
+                                                        v-if="
+                                                            error.$validator ==
+                                                            'maxLength'
+                                                        "
+                                                    >
+                                                        <small class="p-error">
+                                                            Максимальное
+                                                            количество символов:
+                                                            {{
+                                                                error.$params
+                                                                    .max
+                                                            }}
+                                                        </small>
+                                                    </span>
+                                                </div>
+                                            </form>
                                         </div>
                                     </div>
                                 </div>
-
-                                <ConfirmDialog />
                             </div>
                         </div>
                     </template>
@@ -240,7 +321,7 @@
                 </Card>
             </div>
             <div class="col-md-6 col-lg-4 col-xl-3">
-                <Card>
+                <Card class="add-card">
                     <template #content>
                         <form @submit.prevent="addNewList">
                             <div class="grid p-fluid">
@@ -284,7 +365,6 @@
                     </template>
                 </Card>
             </div>
-            l>
         </div>
     </div>
 
@@ -311,8 +391,10 @@ export default {
         lists: [],
         card: [],
         cards: [],
+        tasks: [],
         title: null,
         title_list: null,
+        title_task: null,
         board_id: null,
         list_id: null,
         card_id: null,
@@ -367,6 +449,24 @@ export default {
             }
         },
 
+        addNewTask() {
+            this.v$.title_task.$touch();
+            if (!this.v$.title_task.$error) {
+                axios
+                    .post("/api/tasks", {
+                        title: this.title_task,
+                        card_id: this.card.id,
+                    })
+                    .then((response) => {
+                        this.title_task = "";
+                        this.tasks = [];
+                        this.getAllLists();
+                        this.getCard(this.card.id);
+                        this.v$.$reset();
+                    });
+            }
+        },
+
         getCard(id) {
             axios.get(`/api/cards/${id}`).then((response) => {
                 this.card = response.data.data;
@@ -396,6 +496,17 @@ export default {
                         this.getAllLists();
                     });
             }
+        },
+
+        deleteTask(id) {
+            axios
+                .post(`/api/tasks/${id}`, {
+                    _method: "DELETE",
+                })
+                .then((response) => {
+                    this.getAllLists();
+                    this.getCard(this.card.id);
+                });
         },
 
         getAllLists() {
@@ -470,6 +581,10 @@ export default {
             required,
             maxLength: maxLength(255),
         },
+        title_task: {
+            required,
+            maxLength: maxLength(255),
+        },
         card: {
             title: {
                 required,
@@ -489,7 +604,19 @@ h2,
 h3 {
     cursor: pointer;
 }
+.add-card {
+    background-color: #eff0f1b8;
+}
 .card-title {
     cursor: pointer;
+}
+.form-check {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+}
+.modal-footer {
+    display: block;
+    padding-top: 2rem;
+    border-top: none;
 }
 </style>

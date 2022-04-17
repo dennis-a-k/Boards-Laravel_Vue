@@ -4,7 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class CardResource extends JsonResource
+class TaskResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -18,8 +18,7 @@ class CardResource extends JsonResource
             'id' => $this->id,
             'title' => $this->title,
             'created_at' => $this->created_at,
-            'board_list_id' => $this->board_list_id,
-            'tasks' => TaskResource::collection($this->tasks),
+            'card_id' => $this->card_id,
         ];
     }
 }

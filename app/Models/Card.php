@@ -15,6 +15,11 @@ class Card extends Model
         'board_list_id',
     ];
 
+    public function tasks()
+    {
+        return $this->hasMany(Task::class );
+    }
+
     public function getCard($id)
     {
         return static::findOrFail($id);
