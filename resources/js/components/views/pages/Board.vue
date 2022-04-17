@@ -60,7 +60,6 @@
         </div>
 
         <div class="row">
-            <!-- <ScrollPanel style="width: 100%"> -->
             <div
                 v-for="list in lists"
                 :key="list.id"
@@ -122,9 +121,6 @@
                             >
                                 <template #content>
                                     {{ card.title }}
-                                    <button @click="deleteCard(card.id)">
-                                        Удалить
-                                    </button>
                                 </template>
                             </Card>
 
@@ -170,6 +166,8 @@
                                                                 v-model="
                                                                     card.title
                                                                 "
+                                                                required
+                                                                maxlength="255"
                                                             />
                                                             <Button
                                                                 icon="pi pi-check"
@@ -181,48 +179,6 @@
                                                                 "
                                                             />
                                                         </div>
-
-                                                        <div
-                                                            v-for="error of v$
-                                                                .card.title
-                                                                .$errors"
-                                                            :key="error.$uid"
-                                                            class="text-center"
-                                                        >
-                                                            <span
-                                                                v-if="
-                                                                    error.$validator ==
-                                                                    'required'
-                                                                "
-                                                            >
-                                                                <small
-                                                                    class="p-error"
-                                                                    >Введите
-                                                                    название
-                                                                    карточки!</small
-                                                                >
-                                                            </span>
-
-                                                            <span
-                                                                v-if="
-                                                                    error.$validator ==
-                                                                    'maxLength'
-                                                                "
-                                                            >
-                                                                <small
-                                                                    class="p-error"
-                                                                >
-                                                                    Максимальное
-                                                                    количество
-                                                                    символов:
-                                                                    {{
-                                                                        error
-                                                                            .$params
-                                                                            .max
-                                                                    }}
-                                                                </small>
-                                                            </span>
-                                                        </div>
                                                     </div>
                                                 </form>
 
@@ -233,21 +189,31 @@
                                                     {{ card.title }}
                                                 </h3>
                                             </div>
-                                            <button
-                                                type="button"
-                                                class="btn-close"
-                                                data-bs-dismiss="modal"
-                                                aria-label="Close"
-                                            ></button>
+                                            <div
+                                                class="d-flex justify-content-end"
+                                            >
+                                                <Button
+                                                    class="p-button p-component p-button-icon-only p-button-rounded p-button-danger p-button-text"
+                                                    @click="deleteCard(card.id)"
+                                                    type="button"
+                                                    data-bs-dismiss="modal"
+                                                    aria-label="Close"
+                                                >
+                                                    <span
+                                                        class="pi pi-trash p-button-icon"
+                                                    ></span>
+                                                </Button>
+                                            </div>
                                         </div>
                                         <div class="modal-body">
-                                            {{ v$.card.title }}
                                             <p>{{ card.id }}</p>
                                             <p>{{ card.title }}</p>
                                             <p>{{ card.board_list_id }}</p>
                                         </div>
                                     </div>
                                 </div>
+
+                                <ConfirmDialog />
                             </div>
                         </div>
                     </template>
@@ -318,7 +284,7 @@
                     </template>
                 </Card>
             </div>
-            <!-- </ScrollPanel> -->
+            l>
         </div>
     </div>
 
@@ -484,7 +450,13 @@ export default {
                     })
                     .then((response) => {
                         this.v$.$reset();
-                        this.title_card = false;
+                    })
+                    .catch((error) => {
+                        this.$toast.add({
+                            severity: "error",
+                            summary: "Введите название карточки!",
+                            life: 3000,
+                        });
                     });
             }
         },
@@ -501,7 +473,7 @@ export default {
         card: {
             title: {
                 required,
-                maxLength: maxLength(5),
+                // maxLength: maxLength(5),
             },
         },
         cards: {

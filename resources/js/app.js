@@ -15,6 +15,8 @@ import InputText from "primevue/inputtext";
 import ScrollPanel from "primevue/scrollpanel";
 import ToastService from "primevue/toastservice";
 import Toast from "primevue/toast";
+import ConfirmationService from "primevue/confirmationservice";
+import ConfirmDialog from "primevue/confirmdialog";
 
 import "primevue/resources/themes/saga-blue/theme.css"; //theme
 import "primevue/resources/primevue.min.css"; //core css
@@ -24,6 +26,7 @@ const app = createApp({});
 
 app.use(PrimeVue);
 app.use(ToastService);
+app.use(ConfirmationService);
 app.use(router);
 
 app.component("Message", Message);
@@ -34,5 +37,6 @@ app.component("Card", Card);
 app.component("InputText", InputText);
 app.component("ScrollPanel", ScrollPanel);
 app.component("Toast", Toast);
+app.component("ConfirmDialog", ConfirmDialog);
 
 app.mount("#app");
