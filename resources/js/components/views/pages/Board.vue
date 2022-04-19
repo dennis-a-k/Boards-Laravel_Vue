@@ -100,7 +100,7 @@
 
                     <template #content>
                         <div
-                            class="card-title"
+                            class="card-title card_title"
                             v-for="card in list.cards"
                             :key="card.id"
                             @click="getCard(card.id)"
@@ -198,27 +198,100 @@
                                         <div class="modal-body">
                                             <div
                                                 class="form-check"
-                                                v-for="task in card.tasks"
-                                                :key="task.id"
+                                                v-for="(
+                                                    task, index
+                                                ) in card.tasks"
+                                                :key="index"
                                             >
                                                 <input
                                                     class="form-check-input"
                                                     type="checkbox"
-                                                    :value="task.title"
                                                     :id="
                                                         'flexCheckDefault' +
                                                         task.id
                                                     "
+                                                    @change="
+                                                        updateTask(
+                                                            card.tasks[index]
+                                                        )
+                                                    "
+                                                    v-model="
+                                                        card.tasks[index]
+                                                            .is_done
+                                                    "
                                                 />
+                                                <!-- <input
+                                                    class="form-check-input"
+                                                    type="checkbox"
+                                                    :id="
+                                                        'flexCheckDefault' +
+                                                        task.id
+                                                    "
+                                                    @change="
+                                                        updateTask(
+                                                            card.tasks[index]
+                                                        )
+                                                    "
+                                                    v-else
+                                                /> -->
+
+                                                <form
+                                                    @submit.prevent="
+                                                        updateTask(
+                                                            card.tasks[index]
+                                                        )
+                                                    "
+                                                    v-if="task_id == task.id"
+                                                >
+                                                    <Textarea
+                                                        v-model="
+                                                            card.tasks[index]
+                                                                .title
+                                                        "
+                                                        :autoResize="true"
+                                                        rows="3"
+                                                        cols="60"
+                                                        required
+                                                    />
+                                                    <Button
+                                                        class="p-button p-component p-button-icon-only p-button-rounded p-button-success p-button-text"
+                                                        type="submit"
+                                                    >
+                                                        <span
+                                                            class="pi pi-check p-button-icon"
+                                                        ></span>
+                                                    </Button>
+                                                </form>
                                                 <label
                                                     class="form-check-label"
                                                     :for="
                                                         'flexCheckDefault' +
                                                         task.id
                                                     "
+                                                    v-else
                                                 >
-                                                    {{ task.title }}
+                                                    <s
+                                                        v-if="
+                                                            card.tasks[index]
+                                                                .is_done
+                                                        "
+                                                        ><em>{{
+                                                            task.title
+                                                        }}</em></s
+                                                    >
+                                                    <span v-else>{{
+                                                        task.title
+                                                    }}</span>
                                                 </label>
+
+                                                <Button
+                                                    class="p-button p-component p-button-icon-only p-button-rounded p-button-primary p-button-text"
+                                                    @click="task_id = task.id"
+                                                >
+                                                    <span
+                                                        class="pi pi-pencil p-button-icon"
+                                                    ></span>
+                                                </Button>
                                                 <Button
                                                     class="p-button p-component p-button-icon-only p-button-rounded p-button-danger p-button-text"
                                                     @click="deleteTask(task.id)"
@@ -272,22 +345,6 @@
                                                     >
                                                         <small class="p-error">
                                                             Введите задачу!
-                                                        </small>
-                                                    </span>
-
-                                                    <span
-                                                        v-if="
-                                                            error.$validator ==
-                                                            'maxLength'
-                                                        "
-                                                    >
-                                                        <small class="p-error">
-                                                            Максимальное
-                                                            количество символов:
-                                                            {{
-                                                                error.$params
-                                                                    .max
-                                                            }}
                                                         </small>
                                                     </span>
                                                 </div>
@@ -398,6 +455,7 @@ export default {
         board_id: null,
         list_id: null,
         card_id: null,
+        task_id: null,
         errored: false,
         loader: true,
     }),
@@ -571,6 +629,20 @@ export default {
                     });
             }
         },
+
+        updateTask(task) {
+            axios
+                .post(`/api/tasks/${task.id}`, {
+                    _method: "PUT",
+                    title: task.title,
+                    is_done: task.is_done,
+                    card_id: task.card_id,
+                })
+                .then((response) => {
+                    this.task_id = null;
+                    this.v$.$reset();
+                });
+        },
     },
     validations: () => ({
         title: {
@@ -583,7 +655,6 @@ export default {
         },
         title_task: {
             required,
-            maxLength: maxLength(255),
         },
         card: {
             title: {
@@ -607,12 +678,13 @@ h3 {
 .add-card {
     background-color: #eff0f1b8;
 }
-.card-title {
+.card_title,
+.form-check-label {
     cursor: pointer;
 }
 .form-check {
     display: grid;
-    grid-template-columns: auto 1fr auto;
+    grid-template-columns: auto 1fr auto auto;
 }
 .modal-footer {
     display: block;

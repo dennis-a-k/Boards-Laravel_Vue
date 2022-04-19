@@ -24,8 +24,9 @@ class TaskRequest extends FormRequest
     public function rules()
     {
         return [
-            'title' => 'required|max:255',
-            'card_id' => 'required|integer|exists:cards,id'
+            'title' => 'required',
+            'card_id' => 'required|integer|exists:cards,id',
+            'is_done' => 'required|boolean'
         ];
     }
 }
